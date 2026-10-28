@@ -12,6 +12,7 @@ import boto3
 from botocore.exceptions import ClientError
 from groq import APIStatusError, AuthenticationError, Groq, RateLimitError
 from context import prompt
+from guardrails import check_input, check_output
 
 # Load environment variables
 load_dotenv()
@@ -167,12 +168,21 @@ async def chat(
     try:
         # Generate session ID if not provided
         session_id = request.session_id or str(uuid.uuid4())
+        get_memory_path(session_id)  # rejects malformed session IDs (400)
+
+        # Guardrail: block prompt injection / dangerous requests before any LLM call.
+        # Blocked messages are not saved, so they never enter the model's context.
+        blocked_reply = check_input(request.message)
+        if blocked_reply:
+            return ChatResponse(response=blocked_reply, session_id=session_id)
 
         # Load conversation history
         conversation = load_conversation(session_id)
 
         # Call the LLM with the visitor's own key
-        assistant_response = call_llm(api_key, conversation, request.message)
+        assistant_response = check_output(
+            call_llm(api_key, conversation, request.message)
+        )
 
         # Update conversation history
         conversation.append(

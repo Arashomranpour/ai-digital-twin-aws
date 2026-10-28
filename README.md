@@ -72,3 +72,4 @@ Tear it down with `./scripts/destroy.sh dev` (or `destroy.ps1`).
 - The Lambda role can only read and write its own memory bucket.
 - Provider errors are logged server-side and never returned to the browser.
 - Session IDs are validated, and message length is capped.
+- Guardrails in three layers: an input filter (`backend/guardrails.py`) blocks prompt-injection and dangerous requests before any model call, a hardened system prompt backs it up, and an output check stops the model from leaking its instructions. Run the tests with `cd backend && python -m unittest discover -s tests`.

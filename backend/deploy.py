@@ -50,6 +50,7 @@ def main():
         "lambda_handler.py",
         "context.py",
         "resources.py",
+        "guardrails.py",
     ]:
         if os.path.exists(file):
             shutil.copy2(file, "lambda-package/")
