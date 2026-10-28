@@ -1,0 +1,9 @@
+# Lambda package dependencies only (used by deploy.py).
+# groq is the LLM client (visitors bring their own key).
+# boto3/botocore are NOT listed: the Lambda Python runtime already provides them.
+# uvicorn is for local dev only (see pyproject.toml).
+fastapi
+python-dotenv
+pypdf
+mangum
+groq

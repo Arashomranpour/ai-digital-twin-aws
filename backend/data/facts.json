@@ -1,0 +1,26 @@
+{
+  "full_name": "Arash omranpour",
+  "name": "Arash",
+  "current_role": "Ai engineer",
+  "location": "Barcelona , spain",
+  "email": "arashomranpour@gmail.com",
+  "linkedin": "linkedin.com/in/arash-omranpour",
+  "specialties": [
+    "Lang ecosystem",
+    "aws cloud",
+    "agentic ai and generative ai"
+  ],
+  "years_experience": 5,
+  "education": [
+    {
+      "degree": "Master of Software Engineering",
+      "institution": "tabari University",
+      "year": "2026"
+    },
+    {
+      "degree": "Bachelor of Software Engineering",
+      "institution": "Mazandaran University of Technology ",
+      "year": "2023"
+    }
+  ]
+}
