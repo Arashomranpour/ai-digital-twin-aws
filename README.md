@@ -64,7 +64,38 @@ Requirements: Terraform, AWS CLI (`aws configure`), Docker (used to build the La
 
 The script builds the Lambda zip, runs `terraform apply` in the matching workspace, builds the frontend with the new API URL and syncs it to S3.
 
-Tear it down with `./scripts/destroy.sh dev` (or `destroy.ps1`).
+Tear it down with `./scripts/destroy.sh dev` (or `destroy.ps1`), or run the **Destroy Environment** workflow.
+
+## CI/CD (GitHub Actions)
+
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| `ci.yml` | pull requests, and reused by deploy | backend unit tests, frontend lint + type-check + build, `terraform fmt`/`validate`, secrets scan |
+| `deploy.yml` | push to `main`, or manual run (dev / test / prod) | runs CI, then builds the Lambda zip, `terraform apply`, uploads the site, clears the CloudFront cache and smoke-tests the live URLs |
+| `destroy.yml` | manual only | tears an environment down after you type its name to confirm |
+
+GitHub authenticates to AWS with **OIDC**: no AWS keys are stored anywhere. The deploy role can only be assumed from this repository's `main` branch or a named environment (not from pull requests), and its permissions are limited to the app's `twin-*` resources.
+Terraform state lives in an S3 bucket with a DynamoDB lock table, so local runs and CI share one state.
+
+### One-time setup
+
+```bash
+# 1. Create the state bucket, lock table, GitHub OIDC provider and deploy role
+cd terraform/bootstrap
+terraform init
+terraform apply -var="github_repository=<owner>/<repo>"
+
+# 2. Move any existing local state to S3 (only if you deployed locally before)
+cd ..
+terraform init -migrate-state -force-copy   -backend-config="bucket=twin-terraform-state-<account-id>"   -backend-config="key=twin/terraform.tfstate"   -backend-config="region=<region>"   -backend-config="dynamodb_table=twin-terraform-locks"   -backend-config="encrypt=true"
+
+# 3. Add the repository secrets (Settings > Secrets and variables > Actions)
+gh secret set AWS_ROLE_ARN          # output github_actions_role_arn from step 1
+gh secret set DEFAULT_AWS_REGION    # e.g. eu-north-1
+gh secret set AWS_ACCOUNT_ID
+```
+
+After that, every push to `main` deploys to `dev`.
 
 ## Security notes
 

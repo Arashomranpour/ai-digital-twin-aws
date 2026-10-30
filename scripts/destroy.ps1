@@ -16,6 +16,20 @@ Write-Host "Preparing to destroy $ProjectName-$Environment infrastructure..." -F
 # Navigate to terraform directory
 Set-Location (Join-Path (Split-Path $PSScriptRoot -Parent) "terraform")
 
+# Get AWS Account ID for backend configuration
+$awsAccountId = "$(aws sts get-caller-identity --query Account --output text)".Trim()
+$awsRegion = if ($env:DEFAULT_AWS_REGION) { $env:DEFAULT_AWS_REGION } else { "eu-north-1" }
+
+# Initialize terraform with S3 backend
+Write-Host "Initializing Terraform with S3 backend..." -ForegroundColor Yellow
+terraform init -input=false `
+  "-backend-config=bucket=$ProjectName-terraform-state-$awsAccountId" `
+  "-backend-config=key=$ProjectName/terraform.tfstate" `
+  "-backend-config=region=$awsRegion" `
+  "-backend-config=dynamodb_table=$ProjectName-terraform-locks" `
+  "-backend-config=encrypt=true"
+if ($LASTEXITCODE -ne 0) { Write-Host "terraform init failed" -ForegroundColor Red; exit 1 }
+
 # Check if workspace exists
 $workspaces = terraform workspace list
 if (-not ($workspaces | Select-String $Environment)) {
@@ -29,9 +43,6 @@ if (-not ($workspaces | Select-String $Environment)) {
 terraform workspace select $Environment
 
 Write-Host "Emptying S3 buckets..." -ForegroundColor Yellow
-
-# Get AWS Account ID for bucket names
-$awsAccountId = aws sts get-caller-identity --query Account --output text
 
 # Define bucket names with account ID
 $FrontendBucket = "$ProjectName-$Environment-frontend-$awsAccountId"
@@ -49,6 +60,12 @@ foreach ($bucket in @($FrontendBucket, $MemoryBucket)) {
 }
 
 Write-Host "Running terraform destroy..." -ForegroundColor Yellow
+
+# Terraform reads the Lambda zip even when destroying, so make a placeholder if it is missing
+if (-not (Test-Path "..\backend\lambda-deployment.zip")) {
+    Write-Host "Creating placeholder lambda package for destroy operation..." -ForegroundColor Gray
+    python -c "import zipfile; zipfile.ZipFile('../backend/lambda-deployment.zip', 'w').writestr('placeholder.txt', 'destroy')"
+}
 
 # Run terraform destroy with auto-approve
 if ($Environment -eq "prod" -and (Test-Path "prod.tfvars")) {

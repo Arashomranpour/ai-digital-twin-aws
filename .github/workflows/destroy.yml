@@ -1,0 +1,66 @@
+name: Destroy Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+      confirm:
+        description: 'Type the environment name to confirm destruction'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  destroy:
+    name: Destroy ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      CONFIRM: ${{ inputs.confirm }}
+      DEFAULT_AWS_REGION: ${{ secrets.DEFAULT_AWS_REGION }}
+
+    steps:
+      - name: Verify confirmation
+        # Inputs go through env vars, never straight into the script, to avoid shell injection
+        run: |
+          if [ "$CONFIRM" != "$ENVIRONMENT" ]; then
+            echo "❌ Confirmation does not match the environment name"
+            exit 1
+          fi
+          echo "✅ Destruction confirmed for $ENVIRONMENT"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC, no stored keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions-destroy
+          aws-region: ${{ secrets.DEFAULT_AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Run destroy script
+        run: |
+          chmod +x scripts/destroy.sh
+          ./scripts/destroy.sh "$ENVIRONMENT"
+
+      - name: Destruction complete
+        run: echo "✅ Environment $ENVIRONMENT has been destroyed"

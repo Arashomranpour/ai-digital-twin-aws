@@ -1,26 +1,144 @@
 {
-  "full_name": "Arash omranpour",
-  "name": "Arash",
-  "current_role": "Ai engineer",
-  "location": "Barcelona , spain",
-  "email": "arashomranpour@gmail.com",
-  "linkedin": "linkedin.com/in/arash-omranpour",
-  "specialties": [
-    "Lang ecosystem",
-    "aws cloud",
-    "agentic ai and generative ai"
-  ],
-  "years_experience": 5,
-  "education": [
-    {
-      "degree": "Master of Software Engineering",
-      "institution": "tabari University",
-      "year": "2026"
-    },
-    {
-      "degree": "Bachelor of Software Engineering",
-      "institution": "Mazandaran University of Technology ",
-      "year": "2023"
-    }
-  ]
+ "full_name": "Arash Omranpour",
+ "name": "Arash",
+ "current_role": "AI Engineer & Data Scientist (freelance)",
+ "headline": "AI Engineer · Data Scientist · Agentic & LLM Systems",
+ "location": "Barcelona, Spain",
+ "email": "arashomranpour@gmail.com",
+ "linkedin": "linkedin.com/in/arash-omranpour",
+ "github": "https://github.com/Arashomranpour",
+ "availability": "Available for full-time roles. Based in Barcelona (CET), open to remote, hybrid or on-site work and open to relocation. Spanish resident.",
+ "years_experience": 3,
+ "languages": [
+  "English B2 (IELTS Academic)",
+  "Spanish A2",
+  "Persian (native)"
+ ],
+ "specialties": [
+  "Agentic AI and LLM systems (LangGraph multi-agent, human-in-the-loop)",
+  "RAG pipelines with measured retrieval quality",
+  "Production LLM services (FastAPI, Docker, CI/CD, Terraform on AWS)",
+  "Classical ML and computer vision"
+ ],
+ "skills": {
+  "agents_and_llms": "LangGraph, LangChain, deepagents, Strands Agents, tool calling, multi-agent orchestration, human-in-the-loop, guardrails, prompt-injection defense, prompt engineering, LiteLLM, Model Context Protocol (MCP)",
+  "llm_providers": "OpenAI, Anthropic, Groq, Amazon Bedrock (Nova), open-source models (gpt-oss)",
+  "rag_and_evaluation": "corrective RAG, embeddings, vector databases (ChromaDB, FAISS, S3 Vectors), LangSmith, LangFuse, RAGAS, DeepEval, LLM-as-judge, deterministic eval suites",
+  "engineering": "Python, FastAPI, SQL, Docker, Git, GitHub Actions (CI/CD), pytest, LangServe, Streamlit, Terraform (IaC), JWT auth, Clerk",
+  "ml_dl": "PyTorch, LoRA/QLoRA fine-tuning (incl. Unsloth), TensorFlow, scikit-learn, pandas, NumPy, Hugging Face, NLP",
+  "cloud": "AWS (Bedrock, AgentCore, SageMaker inference, Lambda, SQS, Aurora Serverless, CloudFront, Route 53, EC2, S3, IAM, API Gateway, App Runner, ECR, Boto3), Azure and GCP (production LLM app deployment), Vercel (Next.js deployment), Hugging Face Spaces",
+  "data_and_analytics": "Power BI, Excel, data analysis and visualization",
+  "methodologies": "Agile, Scrum, Agile project management",
+  "production_and_operations": "serverless architecture, observability, explainability, cost monitoring, dev/test/prod environments"
+ },
+ "experience": [
+  {
+   "title": "AI Engineer & Data Scientist (Freelance)",
+   "period": "Sep 2023 - Present",
+   "location": "Mazandaran, Iran (remote and on-site), now Barcelona",
+   "summary": "6 paid ML and GenAI projects delivered end to end for clients in tourism, education, legal, automotive, security and finance. Client code is private; public reference implementations are on GitHub.",
+   "highlights": [
+    "Multi-agent travel planner (LangGraph) for a PhD research team at Islamic Azad University, Sari: tool-calling agents for itinerary generation, validated with ~100 test users; basis of a Best Paper-winning national paper.",
+    "Agentic RAG (vectorless retrieval, LiteLLM routing) for Tabari University: +45% retrieval accuracy on a 50+ question test set scored with RAGAS and LLM-as-judge.",
+    "Multi-agent trading assistant for Mohagheghan Crypto: manager, web-search and finance agents on Groq with live yfinance/SerpAPI data, replacing manual market tracking; bilingual EN/FA app on Hugging Face Spaces via GitHub Actions CI/CD.",
+    "Legal LLM fine-tune for Vokalaye Bartar (legal-tech, Babol): Unsloth LoRA/QLoRA on ~500 legal documents, replacing manual review while keeping data on the firm's infrastructure.",
+    "Quality-control model for an automotive client in Amol: TensorFlow model replaced a fuzzy-logic system, accuracy 70% to 92%+, saving ~2 hours of manual checks per day.",
+    "Parking detection for a security startup in Tehran: computer vision over 10+ live CCTV feeds, saving ~3 hours of manual monitoring per day."
+   ]
+  },
+  {
+   "title": "Teaching Assistant & Workshop Instructor (part-time)",
+   "period": "Sep 2023 - Mar 2025",
+   "location": "Tabari University and Mazandaran University of Science and Technology",
+   "highlights": [
+    "Advised 50+ MSc and PhD students on ML, deep learning and LLM thesis projects; designed and taught an ML/DL course; ran workshops on agentic AI, LangGraph and RAG.",
+    "Delivered a Data Science and AI seminar to 800+ attendees."
+   ]
+  },
+  {
+   "title": "Web Developer (Contract), Doostan Web Group",
+   "period": "Jan 2023 - Aug 2023",
+   "highlights": [
+    "Built and maintained WordPress-based e-commerce sites for a web-development startup in Babol."
+   ]
+  },
+  {
+   "title": "Software Intern, Quantum Coders",
+   "period": "Sep 2022 - Dec 2022",
+   "highlights": [
+    "Built the React.js frontend for 2 internal web apps in a 4-person team during a 4-month internship."
+   ]
+  }
+ ],
+ "education": [
+  {
+   "degree": "MSc, AI for Connected Industries",
+   "institution": "Universitat Politecnica de Catalunya (UPC), Barcelona",
+   "period": "Sep 2026 - Present"
+  },
+  {
+   "degree": "MSc, Software Engineering",
+   "institution": "Tabari University, Mazandaran",
+   "period": "Sep 2023 - Jun 2026",
+   "note": "Coursework completed; thesis proposal on agentic AI submitted"
+  },
+  {
+   "degree": "BSc, Computer Engineering",
+   "institution": "Mazandaran University of Science and Technology",
+   "period": "Sep 2018 - Feb 2023"
+  }
+ ],
+ "awards_and_patent": [
+  "Best Paper, 1st place among 400+ entries (Aug 2025): 'Using Agentic AI and LLMs in the Tourism Industry', 1st National Conference on Economic, Social and Environmental Impacts of Tourism. Presented orally (15+ minute talk, recording available), with press coverage (Civilica ref. 726805).",
+  "Patent pending (Iran): Salon Mega App, a three-app platform (admin, customer, salon); awaiting Justice Department approval."
+ ],
+ "projects": [
+  {
+   "name": "Self-Improving Agent (SelfForge)",
+   "url": "https://github.com/Arashomranpour/Aws_langchain_self_improving_agent",
+   "description": "LangGraph agent that reflects on its failures and rewrites its own policy: held-out accuracy 13% to 100% with no human tuning. Groq, deployable to Amazon Bedrock AgentCore; FastAPI UI, 8 tests, CI."
+  },
+  {
+   "name": "Verifier MCP Server",
+   "url": "https://github.com/Arashomranpour/Verifier_MCP",
+   "description": "MCP server with 5 self-verification tools (symbolic math, sandboxed code, JSON-Schema, units, regex) for Claude Desktop or any agent, plus a Groq self-checking agent. Docker, 18 tests, CI."
+  },
+  {
+   "name": "Agentic RAG API",
+   "url": "https://github.com/Arashomranpour/Agentic-RAG",
+   "description": "FastAPI + LangGraph corrective-RAG service (routing, grading, query rewrite, web fallback) with SSE streaming, memory, API-key auth, local embeddings. Docker, CI, 22 tests."
+  },
+  {
+   "name": "Revenue Leakage Investigation Agent",
+   "url": "https://github.com/Arashomranpour/Revenue-Leakage-Investigation",
+   "description": "LangGraph agent reconciling billing against invoices; human approval before any write, role-based access, audit log. FastAPI + Streamlit; 137 tests."
+  },
+  {
+   "name": "Customer Service Agent",
+   "url": "https://github.com/Arashomranpour/langgraph-customer-service-agent",
+   "description": "Supervisor with 3 tool-calling sub-agents on Groq, human-in-the-loop refund approval, prompt-injection guard; 50-case eval: 100% intent accuracy, 100% escalation recall, 0 unauthorized refunds."
+  },
+  {
+   "name": "Data Analyst Deep Agent",
+   "url": "https://github.com/Arashomranpour/Data-Analyst-Deep-Agent",
+   "description": "Planner with 5 subagents that query, chart and report on CSVs; Guardrails AI with 6 custom validators; 158 offline tests, CI; on Streamlit Cloud."
+  },
+  {
+   "name": "AI Digital Twin on AWS (this website)",
+   "url": "https://github.com/Arashomranpour/ai-digital-twin-aws",
+   "description": "This website: Next.js on S3 + CloudFront, FastAPI on Lambda + API Gateway, Groq bring-your-own-key, S3 memory, Terraform dev/test/prod, least-privilege IAM, 3-layer prompt-injection guardrails."
+  }
+ ],
+ "certifications": [
+  "Machine Learning Specialization (DeepLearning.AI & Stanford)",
+  "Neural Networks and Deep Learning; Improving Deep Neural Networks (DeepLearning.AI)",
+  "Building Generative AI-Powered Applications with Python; Python for Data Science, AI & Development; Excel Basics for Data Analysis (IBM)",
+  "Gemini for Data Scientists and Analysts (Google Cloud)",
+  "Agentic & Generative AI with Cloud (AWS, GCP) 8-month bootcamp (Krish Naik Academy)",
+  "Generative and Agentic AI in Production (Udemy)",
+  "SQL for Data Science (UC Davis)",
+  "Data Analysis and Visualization with Power BI (Microsoft)",
+  "Agile Project Management (Google)",
+  "International Business Environment (University of London)"
+ ]
 }

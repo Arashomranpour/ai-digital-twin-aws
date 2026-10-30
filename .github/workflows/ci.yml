@@ -1,0 +1,94 @@
+name: CI
+
+# Runs on pull requests, and is reused by the deploy workflow so nothing is deployed unless it passes.
+# No AWS access needed here: the role can't be assumed from pull requests.
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt boto3
+
+      - name: Unit tests (guardrails)
+        run: python -m unittest discover -s tests -v
+
+      - name: Import smoke test
+        run: python -c "import server; print('server imports OK')"
+
+  frontend:
+    name: Frontend lint and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build
+
+  terraform:
+    name: Terraform fmt and validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Format check
+        run: terraform fmt -check -recursive terraform
+
+      - name: Validate app stack
+        working-directory: terraform
+        run: |
+          # The real Lambda zip is built at deploy time and is not in git, but Terraform reads it
+          python3 -c "import zipfile; zipfile.ZipFile('../backend/lambda-deployment.zip', 'w').writestr('placeholder.txt', 'ci')"
+          terraform init -backend=false -input=false
+          terraform validate
+
+      - name: Validate bootstrap
+        working-directory: terraform/bootstrap
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+
+  secrets-scan:
+    name: No secrets in the repo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Look for API keys and AWS credentials
+        run: |
+          if git grep -n -I -E "gsk_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|aws_secret_access_key\s*=" -- . ':!.github'; then
+            echo "::error::Possible secret committed. Remove it and rotate the key."
+            exit 1
+          fi
+          echo "No secrets found"

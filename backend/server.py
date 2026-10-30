@@ -10,7 +10,14 @@ import uuid
 from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
-from groq import APIStatusError, AuthenticationError, Groq, RateLimitError
+from groq import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    AuthenticationError,
+    Groq,
+    RateLimitError,
+)
 from context import prompt
 from guardrails import check_input, check_output
 
@@ -109,20 +116,28 @@ def save_conversation(session_id: str, messages: List[Dict]):
 def call_llm(api_key: str, conversation: List[Dict], user_message: str) -> str:
     """Call Groq with the visitor's own API key and the conversation history"""
 
-    # System prompt first, then history (last 25 exchanges), then the new message
+    # System prompt first, then recent history (last 6 exchanges), then the new message.
+    # Groq's free tier counts prompt + max_tokens against a per-minute budget, so keep both small.
     messages = [{"role": "system", "content": prompt()}]
-    for msg in conversation[-50:]:
+    for msg in conversation[-12:]:
         messages.append({"role": msg["role"], "content": msg["content"]})
     messages.append({"role": "user", "content": user_message})
 
+    extra = {}
+    if GROQ_MODEL.startswith("openai/gpt-oss"):
+        extra["extra_body"] = {"reasoning_effort": "low"}  # faster, fewer hidden tokens
+
     try:
-        # Client is built per request from the visitor's key: nothing is shared or cached
-        client = Groq(api_key=api_key, max_retries=1)
+        # Client is built per request from the visitor's key: nothing is shared or cached.
+        # No retries and a 24s timeout: API Gateway cuts requests at 30s, so fail fast with a
+        # clear message instead of hanging.
+        client = Groq(api_key=api_key, max_retries=0, timeout=24.0)
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=messages,
-            max_tokens=2000,
+            max_tokens=700,
             temperature=0.7,
+            **extra,
         )
         return response.choices[0].message.content or ""
 
@@ -133,8 +148,11 @@ def call_llm(api_key: str, conversation: List[Dict], user_message: str) -> str:
     except RateLimitError as e:
         print(f"Groq rate limit: {e}")
         raise HTTPException(
-            status_code=429, detail="Your Groq key hit its rate limit, try again soon"
+            status_code=429, detail="Your Groq key hit its rate limit, try again in a few seconds"
         )
+    except (APITimeoutError, APIConnectionError) as e:
+        print(f"Groq timeout/connection error: {e}")
+        raise HTTPException(status_code=504, detail="The model took too long to respond")
     except APIStatusError as e:
         print(f"Groq API error {e.status_code}: {e}")
         raise HTTPException(status_code=502, detail="The model request failed")
