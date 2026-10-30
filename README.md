@@ -70,7 +70,7 @@ Tear it down with `./scripts/destroy.sh dev` (or `destroy.ps1`), or run the **De
 
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|
-| `ci.yml` | pull requests, and reused by deploy | backend unit tests, frontend lint + type-check + build, `terraform fmt`/`validate`, secrets scan |
+| `ci.yml` | pull requests, and reused by deploy | backend unit tests, frontend lint + build (type-checked), `terraform fmt`/`validate`, secrets scan |
 | `deploy.yml` | push to `main`, or manual run (dev / test / prod) | runs CI, then builds the Lambda zip, `terraform apply`, uploads the site, clears the CloudFront cache and smoke-tests the live URLs |
 | `destroy.yml` | manual only | tears an environment down after you type its name to confirm |
 

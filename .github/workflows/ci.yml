@@ -49,7 +49,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
+      # next build also type-checks (and generates the LayoutProps types a bare tsc needs)
       - run: npm run build
 
   terraform:
