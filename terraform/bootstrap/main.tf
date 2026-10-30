@@ -30,6 +30,16 @@ variable "github_repository" {
   type        = string
 }
 
+variable "github_subject_prefix" {
+  description = <<-EOT
+    GitHub's immutable OIDC subject prefix for this repo, e.g. repo:<owner>@<owner-id>/<repo>@<repo-id>.
+    Repos with immutable subjects enabled present this instead of repo:<owner>/<repo>.
+    Find it with: gh api repos/<owner>/<repo>/actions/oidc/customization/sub
+  EOT
+  type        = string
+  default     = ""
+}
+
 variable "project_name" {
   description = "Prefix used by the app's resources (the deploy role is limited to this prefix)"
   type        = string
@@ -39,6 +49,12 @@ variable "project_name" {
 data "aws_caller_identity" "current" {}
 
 locals {
+  # Subjects the deploy role trusts: the classic repo:<owner>/<repo> form, plus the immutable form if set
+  oidc_subject_prefixes = compact(["repo:${var.github_repository}", var.github_subject_prefix])
+  oidc_subjects = flatten([
+    for prefix in local.oidc_subject_prefixes : ["${prefix}:ref:refs/heads/main", "${prefix}:environment:*"]
+  ])
+
   account_id   = data.aws_caller_identity.current.account_id
   state_bucket = "${var.project_name}-terraform-state-${local.account_id}"
   lock_table   = "${var.project_name}-terraform-locks"
@@ -121,10 +137,7 @@ resource "aws_iam_role" "github_actions" {
           # Only this repo, and only the main branch or a named deployment environment.
           # Pull requests (including from forks) cannot assume the role.
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = [
-              "repo:${var.github_repository}:ref:refs/heads/main",
-              "repo:${var.github_repository}:environment:*",
-            ]
+            "token.actions.githubusercontent.com:sub" = local.oidc_subjects
           }
         }
       }
