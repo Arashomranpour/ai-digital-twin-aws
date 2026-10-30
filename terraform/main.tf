@@ -233,7 +233,9 @@ resource "aws_cloudfront_distribution" "main" {
     acm_certificate_arn            = var.use_custom_domain ? aws_acm_certificate_validation.site[0].certificate_arn : null
     cloudfront_default_certificate = var.use_custom_domain ? false : true
     ssl_support_method             = var.use_custom_domain ? "sni-only" : null
-    minimum_protocol_version       = "TLSv1.2_2021"
+    # CloudFront pins the default *.cloudfront.net certificate to TLSv1, so only a custom
+    # certificate can enforce a newer minimum (otherwise every plan shows a phantom change)
+    minimum_protocol_version = var.use_custom_domain ? "TLSv1.2_2021" : "TLSv1"
   }
 
   origin {

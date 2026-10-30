@@ -19,12 +19,21 @@ Write-Host "Deploying $ProjectName to $Environment..."
 # 1. Build Lambda package (needs Docker running)
 Write-Host "Building Lambda package..."
 Push-Location "$Root\backend"
-try { Invoke-Step { uv run deploy.py } } finally { Pop-Location }
+try { Invoke-Step { uv run --no-project deploy.py } } finally { Pop-Location }
 
-# 2. Terraform workspace & apply
+# 2. Terraform workspace & apply (state lives in S3, see terraform/bootstrap)
 Push-Location "$Root\terraform"
 try {
-    Invoke-Step { terraform init -input=false }
+    $awsAccountId = "$(aws sts get-caller-identity --query Account --output text)".Trim()
+    $awsRegion = if ($env:DEFAULT_AWS_REGION) { $env:DEFAULT_AWS_REGION } else { "eu-north-1" }
+    Invoke-Step {
+        terraform init -input=false `
+            "-backend-config=bucket=$ProjectName-terraform-state-$awsAccountId" `
+            "-backend-config=key=$ProjectName/terraform.tfstate" `
+            "-backend-config=region=$awsRegion" `
+            "-backend-config=dynamodb_table=$ProjectName-terraform-locks" `
+            "-backend-config=encrypt=true"
+    }
     Invoke-Step { terraform workspace select -or-create $Environment }
 
     $tfArgs = @("apply", "-var=project_name=$ProjectName", "-var=environment=$Environment", "-auto-approve")
@@ -38,6 +47,7 @@ try {
     $ApiUrl         = "$(terraform output -raw api_gateway_url)".Trim()
     $FrontendBucket = "$(terraform output -raw s3_frontend_bucket)".Trim()
     $CloudFrontUrl  = "$(terraform output -raw cloudfront_url)".Trim()
+    $DistributionId = "$(terraform output -raw cloudfront_distribution_id)".Trim()
     $CustomUrl      = "$(terraform output -raw custom_domain_url)".Trim()
 }
 finally { Pop-Location }
@@ -51,6 +61,9 @@ try {
     Invoke-Step { npm install }
     Invoke-Step { npm run build }
     Invoke-Step { aws s3 sync ./out "s3://$FrontendBucket/" --delete }
+
+    # Clear CloudFront's cache so visitors get the new site right away
+    Invoke-Step { aws cloudfront create-invalidation --distribution-id $DistributionId --paths "/*" | Out-Null }
 }
 finally { Pop-Location }
 

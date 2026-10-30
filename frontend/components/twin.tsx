@@ -108,7 +108,7 @@ export default function Twin() {
                 role: 'assistant',
                 content:
                     error instanceof Error && error.message === 'rate_limit'
-                        ? 'Your Groq key hit its rate limit. Please wait a minute and try again.'
+                        ? 'Your free Groq key hit its per-minute limit. Wait about 30 seconds and try again.'
                         : 'Sorry, I encountered an error. Please try again.',
                 timestamp: new Date(),
             };
